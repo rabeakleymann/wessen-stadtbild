@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="media/favicon.svg" type="image/svg+xml">
+<script src="src/libs/marked.min.js"></script>
+<title>Wessen Stadtbild?</title>
+<meta name="description" content="Jugendliche trainieren KI mit ihren Perspektiven: ein Workshop im AJZ Chemnitz mit digitaler Ausstellung.">
+<meta property="og:url" content="https://rabeakleymann.github.io/wessen-stadtbild/">
+<meta property="og:title" content="Wessen Stadtbild?">
+<meta property="og:description" content="Jugendliche trainieren KI mit ihren Perspektiven: ein Workshop im AJZ Chemnitz">
+<meta property="og:image" content="https://rabeakleymann.github.io/wessen-stadtbild/media/share.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<style>
+    @font-face {
+        font-family: 'Roboto';
+        font-weight: 700;
+        font-style: normal;
+        src: url('src/fonts/Roboto-Bold.ttf') format('truetype');
+    }
+    @font-face {
+        font-family: 'Roboto';
+        font-weight: 300;
+        font-style: normal;
+        src: url('src/fonts/Roboto-Light.ttf') format('truetype');
+    }
+
+    /* FARBEN: Hier lassen sich die Projektfarben anpassen (z. B. an das Plakat).
+       --link = Linkfarbe, --box = Farbe der Erkennungsrahmen und Labels */
+    :root {
+        --dark: #000;
+        --light: #fff;
+        --side: rgba(25, 25, 25, .7);
+        --link: #2323c8;
+        --box: #e5006d;
+        --muted: #5c5c5c;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --dark: #fff;
+            --light: #000;
+            --side: rgba(230, 230, 230, .7);
+            --link: #a9a9ff;
+            --box: #ff5ca8;
+            --muted: #a8a8a8;
+        }
+    }
+
+    html, body { overflow-x: hidden; }
+    html { scroll-behavior: smooth; }
+
+    main ::selection {
+        background-color: var(--box);
+        color: #fff;
+    }
+
+    body {
+        font-family: 'Roboto', system-ui, sans-serif;
+        /* wie bei C the Unheard mit der Fenstergröße skalierend, aber begrenzt */
+        font-size: clamp(1.0625rem, .75vw + .75vh, 1.375rem);
+        margin: 0;
+        font-weight: 300;
+        color: var(--dark);
+        background-color: var(--light);
+    }
+
+    h1, h2, h3 { font-weight: 700; line-height: 1.15; }
+    p, li { line-height: 1.5em; }
+    h1 { font-size: 2.25em; margin-bottom: 0; }
+    h2 { font-size: 1.5em; margin-top: 2em; }
+    h3 { font-size: 1.25em; }
+    strong { font-weight: 700; }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        background-color: white;
+    }
+
+    main {
+        margin: auto;
+        max-width: 800px;
+        padding: 1em 1em 4em;
+    }
+
+    main a:link, main a:visited { color: var(--link); }
+    main a:hover { color: var(--dark); }
+    main a:active { color: var(--box); }
+
+    :focus-visible {
+        outline: 3px solid var(--box);
+        outline-offset: 2px;
+    }
+
+    /* Bildnachweis: eine Zeile, die nur aus _kursivem Text_ besteht */
+    p.bildnachweis {
+        margin-top: -.75em;
+        text-align: right;
+        color: var(--muted);
+        font-size: .75em;
+    }
+    p.bildnachweis em { font-style: normal; }
+
+    /* Erkennungsrahmen mit Label: ![Beschreibung](media/bild.jpg "Label") */
+    .box {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+        margin-top: 1.7em;
+        border: 3px solid var(--box);
+        line-height: 0;
+    }
+    .box img { display: block; }
+    .box-label {
+        position: absolute;
+        left: -3px;
+        bottom: 100%;
+        max-width: calc(100% + 6px);
+        box-sizing: border-box;
+        padding: .25em .55em;
+        background: var(--box);
+        color: #fff;
+        font-size: .75em;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    /* Galerie: mehrere Bilder ohne Leerzeile untereinander */
+    p.galerie {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+        gap: 1.25em 1em;
+        align-items: end;
+    }
+    p.galerie img { width: 100%; }
+    p.galerie .box { display: block; }
+
+    /* Navigation */
+    nav {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 300px;
+        max-width: 85vw;
+        height: 100%;
+        background-color: var(--side);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: var(--light);
+        overflow-y: auto;
+        transform: translateX(100%);
+        visibility: hidden;
+        transition: transform .5s ease-in-out, visibility 0s .5s;
+        z-index: 1000;
+    }
+    nav.open {
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform .5s ease-in-out;
+    }
+    nav ul {
+        font-size: .8em;
+        list-style: none;
+        padding: 0;
+        margin: .5em 0 0 0;
+    }
+    nav li { margin: 0; padding: 0; }
+    nav li a {
+        display: block;
+        padding: 10px 20px;
+        color: var(--light);
+        text-decoration: none;
+        font-size: 1.25em;
+    }
+    nav li a:hover { background-color: var(--side); }
+    nav li.level-2 { margin-left: 20px; }
+    nav li.level-3 { margin-left: 40px; }
+
+    .hamburger {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        z-index: 10;
+        transition: transform .5s ease-in-out;
+    }
+    .hamburger.open {
+        transform: translateX(calc(-1 * min(300px, 85vw) + 5px));
+        z-index: 1001;
+    }
+    .hamburger span {
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: var(--dark);
+        margin: 6px 0;
+        transition: all .5s;
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 10px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -10px); }
+
+    .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 5;
+        display: none;
+    }
+    .overlay.active { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        nav, nav.open, .hamburger, .hamburger span { transition: none; }
+    }
+</style>
+</head>
+
+<body>
+    <button class="hamburger" id="hamburger" type="button" aria-controls="menu" aria-expanded="false" aria-label="Inhaltsverzeichnis öffnen">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="overlay" id="overlay"></div>
+    <nav id="menu" aria-label="Inhaltsverzeichnis"></nav>
+    <main></main>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const hamburger = document.getElementById("hamburger");
+    const menu = document.getElementById("menu");
+    const overlay = document.getElementById("overlay");
+    const main = document.querySelector("main");
+
+    // README.md laden und in HTML umwandeln (wie bei C the Unheard)
+    async function loadReadme() {
+        try {
+            const response = await fetch("README.md", { cache: "no-cache" });
+            if (!response.ok) throw new Error("README.md nicht gefunden (" + response.status + ")");
+            const markdown = await response.text();
+            main.innerHTML = marked.parse(markdown);
+            prepareImages();
+            populateMenu();
+            // Direktlinks wie …/#digitale-ausstellung anspringen
+            if (location.hash) {
+                const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+                if (target) target.scrollIntoView();
+            }
+        } catch (error) {
+            console.error(error);
+            main.innerHTML = "<p>Die Inhalte (README.md) konnten nicht geladen werden. " +
+                "Per Doppelklick geöffnet funktioniert die Seite nicht – bitte über einen Webserver aufrufen, " +
+                "z. B. mit <code>python -m http.server</code> im Projektordner.</p>";
+        }
+    }
+
+    // Bilder: Labels, Galerien, Bildnachweise
+    function prepareImages() {
+        main.querySelectorAll("img[title]").forEach((img) => {
+            const box = document.createElement("span");
+            box.className = "box";
+            const label = document.createElement("span");
+            label.className = "box-label";
+            label.textContent = img.title;
+            img.removeAttribute("title");
+            img.replaceWith(box);
+            box.append(label, img);
+        });
+
+        main.querySelectorAll("p").forEach((p) => {
+            const items = [...p.childNodes].filter((n) =>
+                !(n.nodeType === Node.TEXT_NODE && !n.textContent.trim()) &&
+                !(n.nodeType === Node.ELEMENT_NODE && n.matches("br")));
+            const isElement = (n, selector) => n.nodeType === Node.ELEMENT_NODE && n.matches(selector);
+            if (items.length >= 2 && items.every((n) => isElement(n, "img, .box"))) {
+                p.classList.add("galerie");
+            }
+            if (items.length === 1 && isElement(items[0], "em")) {
+                p.classList.add("bildnachweis");
+            }
+        });
+
+        main.querySelectorAll("img").forEach((img, i) => {
+            if (i > 0) img.loading = "lazy";
+            img.decoding = "async";
+        });
+    }
+
+    // Menü aus den Überschriften erzeugen
+    function slug(text, used) {
+        const base = text.toLowerCase().trim()
+            .replace(/\s+/g, "-")
+            .replace(/[^\p{L}\p{N}-]/gu, "") || "abschnitt";
+        let id = base;
+        let n = 2;
+        while (used.has(id)) id = base + "-" + n++;
+        used.add(id);
+        return id;
+    }
+
+    function populateMenu() {
+        const used = new Set();
+        const list = document.createElement("ul");
+        main.querySelectorAll("h1, h2, h3").forEach((heading) => {
+            heading.id = slug(heading.textContent, used);
+            const listItem = document.createElement("li");
+            listItem.className = "level-" + heading.tagName.charAt(1);
+            const link = document.createElement("a");
+            link.href = "#" + heading.id;
+            link.textContent = heading.textContent;
+            link.addEventListener("click", () => toggleMenu(false));
+            listItem.appendChild(link);
+            list.appendChild(listItem);
+        });
+        menu.replaceChildren(list);
+    }
+
+    // Menü öffnen/schließen
+    function toggleMenu(open) {
+        const isOpen = typeof open === "boolean" ? open : !menu.classList.contains("open");
+        hamburger.classList.toggle("open", isOpen);
+        menu.classList.toggle("open", isOpen);
+        overlay.classList.toggle("active", isOpen);
+        hamburger.setAttribute("aria-expanded", String(isOpen));
+        hamburger.setAttribute("aria-label", isOpen ? "Inhaltsverzeichnis schließen" : "Inhaltsverzeichnis öffnen");
+    }
+
+    hamburger.addEventListener("click", () => toggleMenu());
+    overlay.addEventListener("click", () => toggleMenu(false));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") toggleMenu(false); });
+
+    loadReadme();
+});
+</script>
+</body>
+</html>
