@@ -58,7 +58,6 @@
 
     body {
         font-family: 'Roboto', system-ui, sans-serif;
-        /* wie bei C the Unheard mit der Fenstergröße skalierend, aber begrenzt */
         font-size: clamp(1.0625rem, .75vw + .75vh, 1.375rem);
         margin: 0;
         font-weight: 300;
@@ -94,7 +93,6 @@
         outline-offset: 2px;
     }
 
-    /* Bildnachweis: eine Zeile, die nur aus _kursivem Text_ besteht */
     p.bildnachweis {
         margin-top: -.75em;
         text-align: right;
@@ -239,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("overlay");
     const main = document.querySelector("main");
 
-    // README.md laden und in HTML umwandeln (wie bei C the Unheard)
+    // README.md laden und in HTML umwandeln
     async function loadReadme() {
         try {
             const response = await fetch("README.md", { cache: "no-cache" });
