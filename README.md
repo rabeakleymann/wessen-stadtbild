@@ -29,7 +29,7 @@ Gefördert durch den Jugendkulturfonds der Stadt Chemnitz.
 
 ## Kontakt
 
-Fragen zur Anmeldung beantwortet das Team des AJZ unter [jugendclub@ajz.de](mailto:jugendclub@ajz.de). Fragen oder Anregungen zum Projekt nimmt das Team der Juniorprofessur für Digital Humanities gern entgegen [rabea.kleymann@phil.tu-chemnitz.de](mailto: rabea.kleymann@phil.tu-chemnitz.de).
+Fragen zur Anmeldung beantwortet das Team des AJZ unter [jugendclub@ajz.de](mailto:jugendclub@ajz.de). Fragen oder Anregungen zum Projekt nimmt das Team der Juniorprofessur für Digital Humanities gern entgegen [rabea.kleymann@phil.tu-chemnitz.de](mailto:rabea.kleymann@phil.tu-chemnitz.de).
 
 ## Impressum 
 
